@@ -1,0 +1,376 @@
+Part A - SPARK CORE RDD TRANSFORMATIONS / ACTIONS (Step 1 & 2)
+1. Data cleaning, cleansing, scrubbing (20% Completion)
+
+Loading RDDs, remove header, blank lines and impose caseclass schema
+
+1. Load the file1 (insuranceinfo1.csv) from HDFS using textFile API into an RDD insuredata
+val insurdata = sc.textFile("hdfs:/user/hduser/sparkhack2/insuranceinfo1.csv")
+insurdata.foreach(println)
+
+2. Remove the header line from the RDD contains column names.
+val insurdata=spark.read.option("header","true").option("inferSchema",true).csv("hdfs:/user/hduser/sparkhack2/insuranceinfo1.csv")
+
+3. Display the count and show few rows and check whether header is removed.
+
+insurdata.count()
+insurdata.collect()
+
+
+4. Remove the blank lines in the rdd.
+
+
+5. Map and split using ‘,’ delimiter.
+
+val insurdata = sc.textFile("hdfs:/user/hduser/sparkhack2/insuranceinfo1.csv")
+val insurdata2 = insurdata.map(_.split(" ")).map(x=>(x(0))).map(x=>(x(1)))
+insurdata2.collect
+
+
+6. Filter number of fields are equal to 10 columns only - analyze why we are doing this and
+
+val df1 = spark.read.csv("hdfs:/user/hduser/sparkhack2").toDF("_c0","_c1","_c2","_c3","_c4","_c5","_c6","_c7","_c8","_c9")
+
+7. Add case class namely insureclass with the field names used as per the header record in
+the file and apply to the above data to create schemaed RDD.
+
+case class insureclass(Issureid:Int,Issuerid2:Int,BusinessDate:String,StateCode:String,SourceName:String,NetworkName:String,NetworkURL:String,custnum:Int,MarketCoverage:String,DentalOnlyPlan:String)
+
+val schemaedRDD = new org.apache.spark.sql.SQLContext(sc)
+import spark.sqlContext._
+val csv = sc.textFile("hdfs:/user/hduser/sparkhack2/insuranceinfo1.csv")
+import org.apache.spark.sql._
+
+import org.apache.spark.sql.types._
+val insureclassSchema = StructType(Array(
+    StructField("Issureid",IntegerType,true),
+    StructField("Issuerid2",IntegerType,true),
+    StructField("BusinessDate",DateType,true),
+    StructField("StateCode", StringType, true),
+    StructField("SourceName", StringType, true),
+    StructField("NetworkName", StringType, true),
+    StructField("NetworkURL", StringType, true),
+    StructField("custnum", StringType, true),
+    StructField("MarketCoverage", StringType, true),
+    StructField("DentalOnlyPlan", StringType, true)))
+
+val rowRDD = csv.map(_.split(",")).map(p => org.apache.spark.sql.Row(p(0),p(1),p(3),p(4),p(5),p(6),p(7),p(8),p(9).toInt))
+val sqlC = new org.apache.spark.sql.SQLContext(sc)
+import sqlC.implicits._
+val csvSchemaRDD = sqlC.applySchema(rowRDD, insureclassSchema)
+csvSchemaRDD.registerTempTable("csv")
+sqlC.sql("select * from csv")
+csv.foreach(println)
+
+8. Take the count of the RDD created in step 7 and step 1 and print how many rows are
+removed in the cleanup process of removing fields does not equals 10.
+ 
+chemaedRDD.count
+=======================================================================================================================================================================
+
+1. Load the file1 (insuranceinfo1.csv) from HDFS using textFile API into an RDD insuredata
+val insurdata1 = sc.textFile("hdfs:/user/hduser/sparkhack2/insuranceinfo2.csv")
+rdd1.foreach(println)
+
+2. Remove the header line from the RDD contains column names.
+val insurdata2=spark.read.option("header","false").option("inferSchema",false).csv("hdfs:/home/hduser/sparkhack2/insuranceinfo1.csv")
+
+3. Display the count and show few rows and check whether header is removed.
+
+insurdata2.count
+
+
+4. Remove the blank lines in the rdd.
+
+
+5. Map and split using ‘,’ delimiter.
+
+val insurdata22 = insurdata2.map(_.split(",")).map(x=>(x(0))).map(x=>(x(1))).map(x=>(x(3))).map(x=>(x(4))).map(x=>(x(5)))
+rdd22.collect
+
+
+6. Filter number of fields are equal to 10 columns only - analyze why we are doing this and
+
+val df2 = spark.read.csv("file:///user/hduser/sparkhack2").toDF("_c0","_c1","_c2","_c3","_c4","_c5","_c6","_c7","_c8","_c9")
+
+7. Add case class namely insureclass with the field names used as per the header record in
+the file and apply to the above data to create schemaed RDD.
+
+case class insureclass1(Issureid:Int,Issuerid2:Int,BusinessDate:String,StateCode:String,SourceName:String,NetworkName:String,NetworkURL:String,custnum:Int,MarketCoverage:String,DentalOnlyPlan:String)
+
+val schemaedRDD1 = new org.apache.spark.sql.SQLContext(sc)
+import spark.sqlContext._
+val insuranceinfo2 = sc.textFile("hdfs:/user/hduser/sparkhack2/insuranceinfo2.csv")
+import org.apache.spark.sql._
+
+import org.apache.spark.sql.types._
+val insureclassSchema1 = StructType(Array(
+    StructField("Issureid",IntegerType,true),
+    StructField("Issuerid2",IntegerType,true),
+    StructField("BusinessDate",DateType,true),
+    StructField("StateCode", StringType, true),
+    StructField("SourceName", StringType, true),
+    StructField("NetworkName", StringType, true),
+    StructField("NetworkURL", StringType, true),
+    StructField("custnum", StringType, true),
+    StructField("MarketCoverage", StringType, true),
+    StructField("DentalOnlyPlan", StringType, true)))
+
+val rowRDD1 = insuranceinfo2.map(_.split(",")).map(p => org.apache.spark.sql.Row(p(0),p(1),p(3),p(4),p(5),p(6),p(7),p(8),p(9).toInt))
+val sqlC1 = new org.apache.spark.sql.SQLContext(sc)
+import sqlC1.implicits._
+val csvSchemaRDD1 = sqlC1.applySchema(rowRDD1, insureclassSchema1)
+csvSchemaRDD.registerTempTable("insuranceinfo2")
+sqlC1.sql("select * from insuranceinfo2")
+insuranceinfo2.foreach(println)
+
+8. Take the count of the RDD created in step 7 and step 1 and print how many rows are
+removed in the cleanup process of removing fields does not equals 10.
+ 
+insuranceinfo2.count
+=======================================================================================================================================================================
+
+Part B - Spark DF & SQL (Step 3, 4 & 5)
+3. DataFrames operations (20% Completion) – Total 55%
+======================================================
+
+20. Create structuretype for all the columns as per the insuranceinfo1.csv.
+Hint: Do it carefully without making typo mistakes. Fields issuerid, issuerid2 should be of
+IntegerType, businessDate should be DateType and all other fields are StringType,
+ensure to import sql.types library.
+
+val insuranceinfo1 = sc.textFile("hdfs:/user/hduser/sparkhack2/insuranceinfo1.csv")
+import org.apache.spark.sql._
+
+import org.apache.spark.sql.types._
+val structuretypeRDD = StructType(Array(
+    StructField("Issureid",IntegerType,true),
+    StructField("Issuerid2",IntegerType,true),
+    StructField("BusinessDate",DateType,true),
+    StructField("StateCode", StringType, true),
+    StructField("SourceName", StringType, true),
+    StructField("NetworkName", StringType, true),
+    StructField("NetworkURL", StringType, true),
+    StructField("custnum", StringType, true),
+    StructField("MarketCoverage", StringType, true),
+    StructField("DentalOnlyPlan", StringType, true)))
+
+======================================================================================================================================================================
+21. Create dataset using the csv module with option to escape ‘,’ accessing the
+insuranceinfo1.csv and insuranceinfo2.csv files, apply the schema of the structure type
+created in the step 20.
+
+case class insureclass(Issureid:Int,Issuerid2:Int,BusinessDate:String,StateCode:String,SourceName:String,NetworkName:String,NetworkURL:String,custnum:Int,MarketCoverage:String,DentalOnlyPlan:String)
+
+val insuranceinfo1 = sc.textFile("hdfs:/user/hduser/sparkhack2/insuranceinfo1.csv")
+val insureRDD = insuranceinfo1.map(x => x.split(",")).filter(x => x.length == 5).map(x => insureclass(x(0).toInt,x(1).toInt,x(2),x(3),x(4),x(5),x(6),x(7).toInt,x(8),x(9)))
+
+val sqlc = new org.apache.spark.sql.SQLContext(sc)
+import sqlc.implicits._
+
+val insurdf = insureRDD.toDF()
+val insurds = insureRDD.toDS()
+    
+val rowrdd=insurdf.rdd
+val schemardd=insurdf.rdd
+    
+val filedf1 = sqlc.createDataFrame(insureRDD)
+val fileds1 = sqlc.createDataset(insureRDD)
+    
+insurdf.printSchema()
+insurdf.show(10,false)
+======================================================================================================================================================================
+
+22. Apply the below DSL functions in the DFs created in step 21.
+
+(a). Rename the fields StateCode and SourceName as stcd and srcnm respectively.
+	
+val dfcsva = spark.read.format("csv").option("header",true).option("mode","dropmalformed").option("delimiter ","").option("inferSchema",true).load("hdfs:/user/hduser/sparkhack2/insuranceinfo1.csv")
+
+val dfcsvc = dfcsva.selectExpr("StateCode as stcd" , "SourceName as srcnm")
+dfcsvc.show(10,false)
+
+(b). Concat IssuerId,IssuerId2 as issueridcomposite and make it as a new field
+val concatdf1=dfcsva.withColumn("issueridcomposite",concat(col(("IssuerId").toString),col(("IssuerId2").toString)))
+concatdfl.printSchema
+concatdf1.show(10,false)
+
+(c). Remove DentalOnlyPlan column
+val columnDrop=dfcsva.drop("DentalOnlyPlan")
+columnDrop.printSchema
+
+(d). Add columns that should show the current system date and timestamp with the
+     fields name of sysdt and systs respectively.
+val curDate = dfcsva.withColumn("current_date",current_date().as("sysdt")).withColumn("current_timestamp",current_timestamp().as("systs"))
+curDate.show(false)
+curDate.select(date_format(col("current_timestamp"),"MM-dd-yyyy").as("sysdt"),date_format(col("current_timestamp"),"HH:mm:ss.SSS").as("systs")).show(10,false)
+======================================================================================================================================================================
+
+23. Remove the rows contains null in any one of the field and count the number of rows
+which contains all columns with some value.
+Hint: Use drop.na options
+val dfnulldrop = dfcsva.na.drop(Array("MarketCoverage","DentalOnlyPlan")).show(10)
+======================================================================================================================================================================
+
+24. Custom Method creation: Create a package (org.inceptez.hack), class (allmethods),
+method (remspecialchar)
+Hint: First create the function directly and then later add inside pkg, class etc..
+
+a. Method should take 1 string argument and 1 return of type string
+
+b. Method should remove all special characters and numbers 0 to 9 - ? , / _ ( ) [ ]
+Hint: Use replaceAll function, usage of [] symbol should use \\ escape sequence.
+
+c. For eg. If I pass to the method value as Pathway - 2X (with dental) it has to
+return Pathway X with dental as output.
+
+package org.inceptez.hack
+import org.apache.spark.sql.functions
+
+object allmethods {
+  def main(args:Array[String]){
+      println("Wlcome to Scala Programing")
+      
+      println(allmethods1("How are you"," doing"));
+    }
+  def allmethods1(a:String,b:String):String = 
+    {
+      println("return of type is string")
+      return "Hello " + a;
+    } 
+  def RemoveSpecialCharacter(s:String)
+    {
+      val removeChars = functions.udf((s:String) => {
+         s.replaceAll("This - text ! has \\ /allot # of % special % characters","")
+          .replaceAll("[^a-zA-Z0-9]","")
+          .replaceAll("[^a-zA-Z0-9\\s+]","")
+          println("Print the special characheter to repalceAll" + s);
+     })
+    }
+  }
+======================================================================================================================================================================
+
+25. Import the package, instantiate the class and register the method generated in step 24
+as a udf for invoking in the DSL function.
+
+import org.apache.spark.sql.functions.{concat,col,lit,udf,max,min}
+
+26. Call the above udf in the DSL by passing NetworkName column as an argument to get
+the special characters removed DF.
+
+
+======================================================================================================================================================================
+
+IV). Tale of handling RDDs, DFs and TempViews (20% Completion) –
+Total 75%
+Loading RDDs, split RDDs, Load DFs, Split DFs, Load Views, Split Views, write UDF, register to
+use in Spark SQL, Transform, Aggregate, store in disk/DB
+
+
+Use RDD functions:
+==================
+30. Load the file3 (custs_states.csv) from the HDFS location, using textfile API in an RDD
+custstates, this file contains 2 type of data one with 5 columns contains customer
+master info and other data with statecode and description of 2 columns.
+
+val custstates = spark.sparkContext.textFile("hdfs:/user/hduser/sparkhack2/custs_states.csv")
+
+
+31. Split the above data into 2 RDDs, first RDD namely custfilter should be loaded only with
+5 columns data and second RDD namely statesfilter should be only loaded with 2
+columns data.
+
+val custfilterRDD = StructType(Array(
+    StructField("Cust_Id",IntegerType,true),
+    StructField("First_Name",StringType,true),
+    StructField("Last_Name", StringType, true),
+    StructField("Age", IntegerType, true),
+    StructField("Profissional", StringType, true)))
+
+val custfilter = sc.textFile("hdfs:/user/hduser/sparkhack2/custs_states.csv").map(_.split(",")).map(x => (x(0),x(1),x(2),x(3),x(4))).toDF()
+val custfilter1 = spark.read.format("csv").option("header",false).option("mode","dropmalformed").option("delimiter ","").option("inferSchema",true).load("hdfs:/user/hduser/sparkhack2/custs_states.csv")
+
+custfilter1.show(10,false)
+======================================================================================================================================================================
+
+32. Load the file3 (custs_states.csv) from the HDFS location, using CSV Module in a DF
+custstatesdf, this file contains 2 type of data one with 5 columns contains customer
+master info and other data with statecode and description of 2 columns.
+
+val custstatesdf = sc.textFile("hdfs:/user/hduser/sparkhack2/custs_states.csv").map(_.split(",")).map(x => (x(0),x(1),x(2),x(3),x(4))).toDF()
+
+val custfilter1 = spark.read.format("csv").option("header",false).option("mode","dropmalformed").option("delimiter ","").option("inferSchema",true).load("hdfs:/user/hduser/sparkhack2/custs_states.csv")
+
+
+val sqlc = new org.apache.spark.sql.SQLContext(sc)
+import sqlc.implicits._
+
+val statesdf = custfilter1.toDF()
+    
+val rowrdd=statesdf.rdd
+val schemardd=statesdf.rdd
+    
+val filedf1 = sqlc.createDataFrame(custfilter)
+val fileds1 = sqlc.createDataset(custfilter)
+ 
+custfilter1.createOrReplaceTempView("custstatesdf")
+
+val custfilter = sqlc.sql("SELECT * FROM custstatesdf ")
+
+custfilter.show()
+======================================================================================================================================================================
+
+33. Split the above data into 2 DFs, first DF namely custfilterdf should be loaded only with 5
+columns data and second DF namely statesfilterdf should be only loaded with 2 columns
+data.
+
+custfilter1.createOrReplaceTempView("custstatesdf")
+
+val statesfilterdf = spark.sql("""select distinct _c0,_c1,_c2,_c3,case when _c4 is null then "UNKNOWN" when _c4="Firefighter" then "Master" when _c4="Lawyer" then "High Court" when _c4="Pilot" then "Airoplane" else _c4 end as _c4 from  custstatesdf where _c0 is not null""")
+
+    statesfilterdf.sort("_c0").show(10)
+    
+    custfilter1.printSchema();
+    statesfilterdf.printSchema()
+======================================================================================================================================================================
+34. Register the above DFs as temporary views as custview and statesview.
+
+val custview=custstatesdf.withColumnRenamed("_c0", "custid").withColumn("IsAPilot",col("_c4").contains("Airoplane")).withColumn("Typeofdata",lit("CustInfo")).withColumn("fullname",concat('_c1,lit(" "),$"_c2")).withColumn("Stringage",$"_c3".cast("String")).drop("_c1","_c2","_c3")
+    
+    custview.printSchema
+    custview.sort("custid").show(5,false)
+    
+    custstatesdf.createOrReplaceTempView("custview")
+======================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
